@@ -1,0 +1,48 @@
+.navigation-bar {
+    background-color: #000000;
+      padding: 10px;
+      text-align: center;
+      font-size:larger;
+      color: #f1f1f1;
+      border-bottom: 3px solid rgb(255, 0, 212);
+      border-left: 3px solid blue;
+      border-right: 3px solid rgb(255, 0, 212);
+    }
+    
+    .nav-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      display: flex; 
+      justify-content: center; 
+    }
+    
+    .nav-item {
+      margin-right: 10px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    
+    .nav-item:last-child {
+      margin-right: 0;
+    }
+  
+    .nav-item:not(:last-child) {
+      margin-right: 40px; 
+    }
+    
+    .nav-item:hover {
+      animation: glowing 1.5s infinite;
+    }
+    
+    @keyframes glowing {
+      0% {
+        box-shadow: 0 0 5px rgb(255, 254, 254);
+      }
+      50% {
+        box-shadow: 0 0 20px rgb(255, 255, 255);
+      }
+      100% {
+        box-shadow: 0 0 5px rgb(255, 255, 255);
+      }
+    }

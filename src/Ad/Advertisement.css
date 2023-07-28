@@ -1,0 +1,67 @@
+.ad {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 5px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #0000000e;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ad-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.3s;
+}
+
+.ad-content img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad:hover .ad-content {
+  opacity: 0.9;
+}
+
+.ad-manual-buttons {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ad:hover .ad-manual-buttons {
+  opacity: 1;
+}
+
+.ad-button {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin: 0 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.ad-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}

@@ -1,0 +1,186 @@
+.location-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.location-container {
+  position: relative;
+}
+
+.signup-overlay,
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.signup-form,
+.login-form {
+  position: relative;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 26px;
+  cursor: pointer;
+  color: #050a13;
+}
+
+.food-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+.location-form-container {
+  width: 400px;
+  height: 300px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.location-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.location-input {
+  width: 100%;
+  height: 40px;
+  padding: 5px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.location-submit {
+  width: 30%;
+  padding: 8px;
+  background-color: #4285f4;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.auto-detect {
+  font-size: 19px;
+  color: #4285f4;
+  margin-top: 10px;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.message {
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.btn {
+  margin-top: 20px;
+}
+
+.btn button {
+  padding: 8px 16px;
+  width: 90px;
+  background-color: #4285f4;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.quote {
+  background-color: #0ae3eb2d;
+  border-top: 5px solid #030203;
+  border-bottom: 5px solid #0e050d;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.quote p {
+  font-style: italic;
+  color: #fdf8f8;
+  font-size: 14px;
+}
+
+.location-input-image {
+  width: 50%;
+  height: auto;
+}
+
+.morphic-text {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  font-size: 24px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(80, 250, 1, 0.5);
+  animation: morphic-animation 2s infinite alternate;
+}
+
+.morphic-animation-0 {
+  animation: morphic-0 2s infinite alternate;
+}
+
+.morphic-animation-1 {
+  animation: morphic-1 2s infinite alternate;
+}
+
+.morphic-animation-2 {
+  animation: morphic-2 2s infinite alternate;
+}
+
+@keyframes morphic-0 {
+  0% {
+    letter-spacing: -1px;
+    transform: scale(1);
+  }
+  100% {
+    letter-spacing: 2px;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes morphic-1 {
+  0% {
+    letter-spacing: -1px;
+    transform: scale(1);
+  }
+  100% {
+    letter-spacing: 2px;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes morphic-2 {
+  0% {
+    letter-spacing: -1px;
+    transform: scale(1);
+  }
+  100% {
+    letter-spacing: 2px;
+    transform: scale(1.05);
+  }
+}

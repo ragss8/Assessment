@@ -1,0 +1,889 @@
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
+import '../User/Main.css';
+import axios from 'axios';
+import Header from '../Header/Header';
+import NavigationBar from '../Nav/NavigationBar';
+import RestaurantInfo from './Redux/RestaurantInfo';
+
+const Main = () => {
+  const location = useLocation();
+  const sessionToken = location.state?.sessionToken;
+
+  const handleLogout = () => {
+    axios
+      .post('http://localhost:8002/logout', { session_token: sessionToken })
+      .then((response) => {
+        console.log('User logged out');
+      })
+      .catch((error) => {
+        console.error('Logout failed:', error);
+        if (error.response) {
+          console.log('Response data:', error.response.data);
+        }
+      });
+  };
+
+  const RestaurantForm = () => {
+    const [userId, setUserId] = useState('');
+    const [restaurantName, setRestaurantName] = useState('');
+    const [address, setAddress] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
+    const [cuisineType, setCuisineType] = useState('');
+    const [openingHours, setOpeningHours] = useState('');
+    const [deliveryTime, setDeliveryTime] = useState('');
+    const [averageRating, setAverageRating] = useState('');
+    const [agreeTerms, setAgreeTerms] = useState(false);
+
+    const handleRestaurantSubmit = (event) => {
+      event.preventDefault();
+
+      if (!restaurantName || !address || !phoneNumber || !email || !cuisineType || !openingHours || !deliveryTime || !averageRating) {
+        console.error('All fields are required');
+        return;
+      }
+
+      const payload = {
+        restaurantName,
+        address,
+        phoneNumber,
+        email,
+        cuisineType,
+        openingHours: new Date().toISOString().substr(11, 5),
+        deliveryTime,
+        averageRating,
+      };
+
+      const url = `http://localhost:8002/update-restaurant/${email}`;
+      axios
+        .put(url, payload)
+        .then((response) => {
+          console.log('Restaurant information updated successfully:', response.data);
+        })
+        .catch((error) => {
+          console.error('Error updating restaurant information:', error);
+        });
+    };
+
+    const handleCheckboxChange = (event) => {
+      setAgreeTerms(event.target.checked);
+    };
+
+    const handleGetUserId = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8002/get-user-id/${email}`);
+        setUserId(response.data._id);
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+
+    return (
+      <div>
+        <div className="policies-terms" style={{ width: "1400px" }}>
+           <h2>Terms and Conditions *</h2>
+            <p>Privacy Policy: The privacy policy describes how the app collects, uses, and protects the personal information of the food delivery partners. It may include details about data sharing, storage, and security measures.</p>
+            <p>Acceptable Use Policy: The acceptable use policy sets forth guidelines for the appropriate and responsible use of the app and its services. It may prohibit actions such as harassment, discrimination, fraud, or any illegal activities.</p>
+            <p>Code of Conduct: The code of conduct outlines expected behavior and professional conduct for food delivery partners. It may include guidelines on professionalism, punctuality, proper attire, and customer interactions.</p>
+            <p>Insurance and Liability: The app may require food delivery partners to maintain appropriate insurance coverage for their vehicles, liability, and personal injury. It may outline the responsibilities and liabilities of partners in case of accidents or damages during delivery.</p>
+            <p>Modification and Termination: The app may state its right to modify the terms and conditions, policies, or notices at any time. It may also outline the circumstances under which the partnership agreement can be terminated by either party.</p>
+            <p>Dispute Resolution: The app may provide information on the process for resolving disputes, including mediation or arbitration procedures, and the jurisdiction or governing law applicable to any legal actions.</p>
+            <p>Compliance with Laws: The agreement may emphasize the obligation for food delivery partners to comply with all applicable laws and regulations related to food safety, transportation, employment, and any other relevant legislation.</p>
+            <p>Communication and Notices: The app may specify how it will communicate with partners and deliver important notices or updates, such as changes in policies or service updates. It may require partners to maintain updated contact information.</p>
+          <label>
+            <input type="checkbox" checked={agreeTerms} onChange={handleCheckboxChange} />
+            <b>I agree to the terms and policies.</b>
+          </label>
+        </div>
+        <div className="restaurant-form" style={{ marginBottom: "30px" }}>
+          <h2>Restaurant Form</h2>
+          <p>Note:</p>
+          <ol>
+            <li><i>Enter your email address correctly else it won't be updated.</i></li>
+            <li><i>Also use the same form to update your information</i></li>
+          </ol>
+          <form onSubmit={handleRestaurantSubmit}>
+            <label>
+              Restaurant Name:
+              <input
+                type="text"
+                value={restaurantName}
+                onChange={(e) => setRestaurantName(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Address:
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Phone Number:
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Email:
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Cuisine Type:
+              <input
+                type="text"
+                value={cuisineType}
+                onChange={(e) => setCuisineType(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Opening Hours:
+              <input
+                type="time"
+                value={openingHours}
+                onChange={(e) => setOpeningHours(e.target.value)}
+                step="900"
+                required
+              />
+            </label>
+            <label>
+              Delivery Time:
+              <input
+                type="text"
+                value={deliveryTime}
+                onChange={(e) => setDeliveryTime(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Average Rating:
+              <input
+                type="number"
+                value={averageRating}
+                onChange={(e) => setAverageRating(e.target.value)}
+                step="0.1"
+                min="0"
+                max="5"
+                required
+              />
+            </label>
+            <button type="submit" disabled={!agreeTerms}>
+              Submit
+            </button>
+            <div style={{ display: "none" }}>
+              <input
+                type="email"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <p>Click Below!!Copy the UserID for further Purposes:</p>
+            <button onClick={handleGetUserId}>Get ID</button>
+            {userId && <p>User ID: {userId}</p>}
+          </form>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className='main'>
+      <Header />
+      <NavigationBar handleLogout={handleLogout} />
+      <div className='container'>
+        <div className='content'>
+          <RestaurantForm />
+          <RestaurantInfo />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Main;
+
+
+// import React, { useState } from 'react';
+// import "./rest-form.css"
+
+// const Restaurant = () => {
+//   const [menuItemid, setMenuItemId] = useState('');
+//   const [restaurantId, setRestaurantId] = useState('');
+//   const [name,setName] = useState('');
+//   const [description,setDescription] = useState('');
+//   const [price,setPrice] = useState('');
+//   const [ingredients,setIngredients] = useState('');
+
+//   const handleMenuItemSubmit = (event) => {
+//     event.preventDefault();
+
+//     id: str, restaurant_id, name, description, price,ingredients
+//     console.log('menuItemid,',);
+//     console.log('restaurantId',);
+//     console.log('name,',);
+//     console.log('description',);
+//     console.log('price',);
+//     console.log('ingredients',);
+
+//   };
+
+//   const handlePhotoChange = (event) => {
+//     const file = event.target.files[0];
+//     setRestaurantPhoto(file);
+//   };
+
+//   const handleOverlayClick = () => {
+//     setShowOverlay(false);
+//   };
+
+//   const handleOpenForm = () => {
+//     setShowOverlay(true);
+//   };
+
+//   return (
+//     <div>
+//       <h2>Restaurant Details</h2>
+//       <button onClick={handleOpenForm}>Add Restaurant</button>
+//       {showOverlay && (
+//         <div className="overlay" onClick={handleOverlayClick}>
+//           <div className="form-container" onClick={(e) => e.stopPropagation()}>
+//             <h2>Add Restaurant<h6>click away from form to close </h6></h2>
+//             <form onSubmit={handleRestaurantSubmit}>
+//               <label>
+//                 Restaurant Name:
+//                 <input
+//                   type="text"
+//                   value={restaurantName}
+//                   onChange={(e) => setRestaurantName(e.target.value)}
+//                 />
+//               </label>
+//               <label>
+//                 Address:
+//                 <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+//               </label>
+//               <label>
+//                 Phone Number:
+//                 <input
+//                   type="text"
+//                   value={phoneNumber}
+//                   onChange={(e) => setPhoneNumber(e.target.value)}
+//                 />
+//               </label>
+//               <label>
+//                 Cuisine Type:
+//                 <input
+//                   type="text"
+//                   value={cuisineType}
+//                   onChange={(e) => setCuisineType(e.target.value)}
+//                 />
+//               </label>
+//               <label>
+//                 Opening Hours:
+//                 <input
+//                   type="text"
+//                   value={openingHours}
+//                   onChange={(e) => setOpeningHours(e.target.value)}
+//                 />
+//               </label>
+//               <label>
+//                 Delivery Time:
+//                 <input
+//                   type="text"
+//                   value={deliveryTime}
+//                   onChange={(e) => setDeliveryTime(e.target.value)}
+//                 />
+//               </label>
+//               <label>
+//                 Average Rating:
+//                 <input
+//                   type="text"
+//                   value={averageRating}
+//                   onChange={(e) => setAverageRating(e.target.value)}
+//                 />
+//               </label>
+//               <label>
+//                 Restaurant Photo:
+//                 <input type="file" accept="image/*" onChange={handlePhotoChange} />
+//               </label>
+//               <button type="submit">Submit</button>
+//             </form>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Restaurant;
+
+
+// {/*
+//   const [name, setName] = useState('');
+//   const [email, setEmail] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [phoneNumber, setPhoneNumber] = useState('');
+//   // const [vehicleDetails, setVehicleDetails] = useState('');
+//   // const [photo, setPhoto] = useState(null);
+
+//   const handleSubmit = (event) => {
+//     event.preventDefault();
+//     // Handle form submission
+//     console.log('Name:', name);
+//     console.log('Email:', email);
+//     console.log('Phone Number:', phoneNumber);
+//     // console.log('Vehicle Details:', vehicleDetails);
+//     // console.log('Photo:', photo);
+
+//     setName('');
+//     setEmail('');
+//     setPhoneNumber('');
+//     // setVehicleDetails('');
+//     // setPhoto(null);
+//   };
+
+//   // const handlePhotoChange = (event) => {
+//   //   const file = event.target.files[0];
+//   //   setPhoto(file);
+//   // };
+
+// <div className="form-group">
+// <label htmlFor="vehicleDetails">Vehicle Details:</label>
+// <input
+//   type="text"
+//   id="vehicleDetails"
+//   value={vehicleDetails}
+//   onChange={(e) => setVehicleDetails(e.target.value)}
+// />
+// </div>
+// <div className="form-group">
+// <label htmlFor="photo">Photo:</label>
+// <input type="file" accept="image/*" onChange={handlePhotoChange} />
+// </div> */}
+
+// import React, { useState } from 'react';
+// import axios from 'axios';
+// import Header from '../Header/Header';
+// import Sidebar from "../Sidebar/Sidebar";
+// import './Menu.css';
+
+// const Menu = () => {
+//   const [restaurantId, setRestaurantId] = useState('');
+//   const [name, setName] = useState('');
+//   const [description, setDescription] = useState('');
+//   const [price, setPrice] = useState('');
+//   const [ingredients, setIngredients] = useState('');
+//   const [menuList, setMenuList] = useState([]);
+
+//   const handleRestaurantIdChange = (event) => {
+//     setRestaurantId(event.target.value);
+//   };
+
+//   const handleNameChange = (event) => {
+//     setName(event.target.value);
+//   };
+
+//   const handleDescriptionChange = (event) => {
+//     setDescription(event.target.value);
+//   };
+
+//   const handlePriceChange = (event) => {
+//     setPrice(event.target.value);
+//   };
+
+//   const handleIngredientsChange = (event) => {
+//     setIngredients(event.target.value);
+//   };
+
+//   const handleAddItem = () => {
+//     const newItem = {
+//       restaurant_id: restaurantId,
+//       name,
+//       description,
+//       price,
+//       ingredients,
+//     };
+
+//     axios
+//       .post(`http://localhost:8000/menu/${restaurantId}`, newItem)
+//       .then(response => {
+//         console.log(response.data);
+//         setMenuList([...menuList, newItem]);
+//         setRestaurantId('');
+//         setName('');
+//         setDescription('');
+//         setPrice('');
+//         setIngredients('');
+//       })
+//       .catch(error => {
+//         console.error(error);
+//       });
+//   };
+
+//   return (
+//     <div>
+//       <Header />
+//       <div className='container'>
+//         <Sidebar />
+//         <div className="menu-container">
+//           <h2 className="menu-heading">Menu</h2>
+//           <form className="menu-form">
+//             <div className='menu-input-row'>
+//               <label className='menu-label'>
+//                 Enter the info to display the dishes:
+//               </label>
+//               <label className="menu-label">
+//                 <input
+//                   type="text"
+//                   className="menu-input"
+//                   placeholder='Restaurant ID'
+//                   value={restaurantId}
+//                   onChange={handleRestaurantIdChange}
+//                 />
+//               </label>
+//               <label className="menu-label">
+//                 <input
+//                   type="text"
+//                   className="menu-input"
+//                   placeholder='Dish-name'
+//                   value={name}
+//                   onChange={handleNameChange}
+//                 />
+//               </label>
+//               <label className="menu-label">
+//                 <input
+//                   type="text"
+//                   className="menu-input"
+//                   placeholder='Description...'
+//                   value={description}
+//                   onChange={handleDescriptionChange}
+//                 />
+//               </label>
+//               <label className="menu-label">
+//                 <input
+//                   type="text"
+//                   className="menu-input"
+//                   placeholder='Price'
+//                   value={price}
+//                   onChange={handlePriceChange}
+//                 />
+//               </label>
+//               <label className="menu-label">
+//                 <input
+//                   type="text"
+//                   className="menu-input"
+//                   placeholder='Ingredients'
+//                   value={ingredients}
+//                   onChange={handleIngredientsChange}
+//                 />
+//               </label>
+//               <button
+//                 type="button"
+//                 className="menu-button"
+//                 onClick={handleAddItem}
+//               >
+//                 Add Item
+//               </button>
+//             </div>
+//           </form>
+//           <h3 className="menu-list-heading">Menu List</h3>
+//           {menuList.length > 0 ? (
+//             <ul className="menu-list">
+//               {menuList.map((item, index) => (
+//                 <li key={index} className="menu-list-item">
+//                   <strong>{item.name}</strong> - {item.description} - {item.ingredients} - ${item.price}
+//                 </li>
+//               ))}
+//             </ul>
+//           ) : (
+//             <p>No items added to the menu yet.</p>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Menu;
+
+
+// {/* 
+// const Restaurant = ({ addRestaurant }) => {
+//   const [restaurantName, setRestaurantName] = useState('');
+//   const [address, setAddress] = useState('');
+//   const [phoneNumber, setPhoneNumber] = useState('');
+//   const [email, setEmail] = useState('');
+//   const [password, setPassword] = useState('');
+//   // const [cuisineType, setCuisineType] = useState('');
+//   // const [openingHours, setOpeningHours] = useState('');
+//   // const [deliveryTime, setDeliveryTime] = useState('');
+//   // const [averageRating, setAverageRating] = useState('');
+//   // const [restaurantPhoto, setRestaurantPhoto] = useState(null);
+//   // const [restaurantLicense, setRestaurantLicense] = useState(null);
+//   // const [ownersIdProof, setOwnersIdProof] = useState(null);
+//   // const [businessRegistration, setBusinessRegistration] = useState(null);
+//   // const [addressVerification, setAddressVerification] = useState(null);
+//   // const [healthAndSafetyCertificates, setHealthAndSafetyCertificates] = useState(null);
+//   // const [taxRegistration, setTaxRegistration] = useState(null);
+
+//   const handleRestaurantSubmit = (event) => {
+//     event.preventDefault();
+
+//     const newRestaurant = {
+//       name: restaurantName,
+//       address: address,
+//       phoneNumber: phoneNumber,
+//       email:email,
+//       password:password,
+//       // cuisineType: cuisineType,
+//       // openingHours: openingHours,
+//       // deliveryTime: deliveryTime,
+//       // averageRating: averageRating,
+//       // photo: restaurantPhoto,
+//       // license: restaurantLicense,
+//       // ownersIdProof: ownersIdProof,
+//       // businessRegistration: businessRegistration,
+//       // addressVerification: addressVerification,
+//       // healthAndSafetyCertificates: healthAndSafetyCertificates,
+//       // taxRegistration: taxRegistration,
+//     };
+
+//     addRestaurant(newRestaurant);
+
+//     setRestaurantName('');
+//     setAddress('');
+//     setPhoneNumber('');
+//     setEmail('');
+//     setPassword('');
+//     // setCuisineType('');
+//     // setOpeningHours('');
+//     // setDeliveryTime('');
+//     // setAverageRating('');
+//     // setRestaurantPhoto(null);
+//     // setRestaurantLicense(null);
+//     // setOwnersIdProof(null);
+//     // setBusinessRegistration(null);
+//     // setAddressVerification(null);
+//     // setHealthAndSafetyCertificates(null);
+//     // setTaxRegistration(null);
+//   };
+
+//   // const handlePhotoChange = (event, setState) => {
+//   //   const file = event.target.files[0];
+//   //   setState(file);
+//   // };
+
+  
+// <label>
+//           Cuisine Type: <span className="important-field">*</span>
+//           <input
+//             type="text"
+//             value={cuisineType}
+//             onChange={(e) => setCuisineType(e.target.value)}
+//             required
+//           />
+//         </label>
+//           <label>
+//             Opening Hours: <span className="important-field">*</span>
+//             <input
+//               type="time"
+//               value={openingHours}
+//               onChange={(e) => setOpeningHours(e.target.value)}
+//               required
+//               step="900" // 15 minutes increment
+//             />
+//           </label>
+//           <label>
+//             Delivery Time: <span className="important-field">*</span>
+//             <input
+//               type="time"
+//               value={deliveryTime}
+//               onChange={(e) => setDeliveryTime(e.target.value)}
+//               required
+//               step="900" // 15 minutes increment
+//           />
+//         </label>
+//         <label>
+//           Restaurant Photo: <span className="important-field">*</span>
+//           <input
+//             type="file"
+//             accept="image/*"
+//             onChange={(e) => handlePhotoChange(e, setRestaurantPhoto)}
+//             required
+//           />
+//         </label>
+//         <label>
+//           Restaurant License/Certificate: <span className="important-field">*</span>
+//           <input
+//             type="file"
+//             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+//             onChange={(e) => handlePhotoChange(e, setRestaurantLicense)}
+//             required
+//           />
+//         </label>
+//         <label>
+//           Owner's ID Proof: <span className="important-field">*</span>
+//           <input
+//             type="file"
+//             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+//             onChange={(e) => handlePhotoChange(e, setOwnersIdProof)}
+//             required
+//           />
+//         </label>
+//         <label>
+//           Business Registration Documents: <span className="important-field">*</span>
+//           <input
+//             type="file"
+//             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+//             onChange={(e) => handlePhotoChange(e, setBusinessRegistration)}
+//             required
+//           />
+//         </label>
+//         <label>
+//           Address Verification: <span className="important-field">*</span>
+//          ```jsx
+//           <input
+//             type="file"
+//             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+//             onChange={(e) => handlePhotoChange(e, setAddressVerification)}
+//             required
+//           />
+//         </label>
+//         <label>
+//           Health and Safety Certificates: <span className="important-field">*</span>
+//           <input
+//             type="file"
+//             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+//             onChange={(e) => handlePhotoChange(e, setHealthAndSafetyCertificates)}
+//             required
+//           />
+//         </label>
+//         <label>
+//           Tax Registration: <span className="important-field">*</span>
+//           <input
+//             type="file"
+//             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+//             onChange={(e) => handlePhotoChange(e, setTaxRegistration)}
+//             required
+//           />
+//         </label> */}
+
+
+
+
+// //         import React from 'react';
+// // import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
+// // import { useState } from 'react';
+// // import '../User/Main.css';
+// // import axios from 'axios';
+// // import Sidebar from "../Sidebar/Sidebar";
+// // import Header  from '../Header/Header';
+// // import NavigationBar from '../Nav/NavigationBar';
+
+// // const Main = () => {
+// //   const location = useLocation();
+// //   const sessionToken = location.state?.sessionToken;
+// //   const handleLogout = () => {
+// //     axios
+// //       .post('http://localhost:8000/logout', { session_token: sessionToken })
+// //       .then((response) => {
+// //         console.log('User logged out');
+// //       })
+// //       .catch((error) => {
+// //         console.error('Logout failed:', error);
+// //         if (error.response) {
+// //           console.log('Response data:', error.response.data);
+// //         }
+// //       });      
+// //   };
+
+// //   const Restaurant = () => {
+// //     const [restaurantName, setRestaurantName] = useState('');
+// //     const [address, setAddress] = useState('');
+// //     const [phoneNumber, setPhoneNumber] = useState('');
+// //     const [email, setEmail] = useState('');
+// //     const [password, setPassword] = useState('');
+// //     const [cuisineType, setCuisineType] = useState('');
+// //     const [openingHours, setOpeningHours] = useState('');
+// //     const [deliveryTime, setDeliveryTime] = useState('');
+// //     const [averageRating, setAverageRating] = useState('');
+// //     const [restaurantPhoto, setRestaurantPhoto] = useState(null);
+// //     // const [restaurantLicense, setRestaurantLicense] = useState(null);
+// //     // const [businessRegistration, setBusinessRegistration] = useState(null);
+// //     // const [healthAndSafetyCertificates, setHealthAndSafetyCertificates] = useState(null);
+// //     // const [taxRegistration, setTaxRegistration] = useState(null);
+// //     const [agreeTerms, setAgreeTerms] = useState(false);
+  
+// //     const handleRestaurantSubmit = (event) => {
+// //         event.preventDefault();
+      
+// //         const formData = new FormData();
+// //         formData.append('restaurantPhoto', restaurantPhoto);
+// //         // formData.append('restaurantLicense', restaurantLicense);
+// //         // formData.append('businessRegistration', businessRegistration);
+// //         // formData.append('healthAndSafetyCertificates', healthAndSafetyCertificates);
+// //         // formData.append('taxRegistration', taxRegistration);
+      
+// //         const payload = {
+// //           restaurantName,
+// //           address,
+// //           phoneNumber,
+// //           email,
+// //           cuisineType,
+// //           openingHours,
+// //           deliveryTime,
+// //           averageRating,
+// //         };
+      
+// //         axios
+// //           .post('http://localhost:8000/store-restaurant', { formData, payload })
+// //           .then((response) => {
+// //             console.log('Restaurant information stored successfully:', response.data);
+// //             setRestaurantPhoto(null);
+// //             // setRestaurantLicense(null);
+// //             // setBusinessRegistration(null);
+// //             // setHealthAndSafetyCertificates(null);
+// //             // setTaxRegistration(null);
+// //           })
+// //           .catch((error) => {
+// //             console.error('Error storing restaurant information:', error);
+// //           });
+// //       };
+
+// //       const AddedRestaurant = () => {
+
+// //       };
+  
+// //       const handlePhotoChange = (event) => {
+// //         const file = event.target.files[0];
+// //         setRestaurantPhoto(file);
+// //       };
+// //     // const handleDetailing = (event) => {
+// //     //     const file = event.target.files[0];
+// //     //     setState(file);
+// //     // }
+
+// //     const handleCheckboxChange = (event) => {
+// //         setAgreeTerms(event.target.checked);
+// //       };
+
+      
+  
+// //     return (
+// //         <div>
+// //             <div className="policies-terms" style={{width:"1400px"}}>
+// //             <h2>Terms and Conditions *</h2>
+// //             <p>Privacy Policy: The privacy policy describes how the app collects, uses, and protects the personal information of the food delivery partners. It may include details about data sharing, storage, and security measures.</p>
+// //             <p>Acceptable Use Policy: The acceptable use policy sets forth guidelines for the appropriate and responsible use of the app and its services. It may prohibit actions such as harassment, discrimination, fraud, or any illegal activities.</p>
+// //             <p>Code of Conduct: The code of conduct outlines expected behavior and professional conduct for food delivery partners. It may include guidelines on professionalism, punctuality, proper attire, and customer interactions.</p>
+// //             <p>Insurance and Liability: The app may require food delivery partners to maintain appropriate insurance coverage for their vehicles, liability, and personal injury. It may outline the responsibilities and liabilities of partners in case of accidents or damages during delivery.</p>
+// //             <p>Modification and Termination: The app may state its right to modify the terms and conditions, policies, or notices at any time. It may also outline the circumstances under which the partnership agreement can be terminated by either party.</p>
+// //             <p>Dispute Resolution: The app may provide information on the process for resolving disputes, including mediation or arbitration procedures, and the jurisdiction or governing law applicable to any legal actions.</p>
+// //             <p>Compliance with Laws: The agreement may emphasize the obligation for food delivery partners to comply with all applicable laws and regulations related to food safety, transportation, employment, and any other relevant legislation.</p>
+// //             <p>Communication and Notices: The app may specify how it will communicate with partners and deliver important notices or updates, such as changes in policies or service updates. It may require partners to maintain updated contact information.</p>
+// //             <label>
+// //               <input type="checkbox" checked={agreeTerms} onChange={handleCheckboxChange} />
+// //               <b>I agree to the terms and policies.</b>
+// //             </label>
+// //             </div>
+// //         <div className="restaurant-form">
+// //           <h2>Restaurant Form</h2>
+// //           <form onSubmit={handleRestaurantSubmit}>
+// //             <label>
+// //               Restaurant Name:
+// //               <input type="text" id="restaurantName" required />
+// //             </label>
+// //             <label>
+// //               Address:
+// //               <input type="text" id="address" required />
+// //             </label>
+// //             <label>
+// //               Phone Number:
+// //               <input type="tel" id="phoneNumber" required />
+// //             </label>
+// //             <label>
+// //               Email:
+// //               <input type="email" id="email" required />
+// //             </label>
+// //             <label>
+// //               Cuisine Type:
+// //               <input type="text" id="cuisineType" required />
+// //             </label>
+// //             <label>
+// //               Opening Hours:
+// //               <input type="time" id="openingHours" step="900" required />
+// //             </label>
+// //             <label>
+// //               Delivery Time:
+// //               <input type="text" id="deliveryTime" required />
+// //             </label>
+// //             <label>
+// //               Average Rating:
+// //               <input type="number" id="averageRating" step="0.1" min="0" max="5" required />
+// //             </label>
+// //             <label>
+// //               Restaurant Photo (PDF, JPG, JPEG):
+// //               <input type="file" id="restaurantPhoto" accept=".pdf,.jpg,.jpeg" onChange={handlePhotoChange} required />
+// //             </label>
+// //             {/* <label>
+// //               License:
+// //               <input type="file" id="restaurantLicense" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onChange={handleDetailing} required />
+// //             </label>
+// //             <label>
+// //               Owner's ID Proof:
+// //               <input type="file" id="ownersIdProof" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onChange={handleDetailing}  required />
+// //             </label>
+// //             <label>
+// //               Business Registration:
+// //               <input type="file" id="businessRegistration" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onChange={handleDetailing} required />
+// //             </label>
+// //             <label>
+// //               Address Verification:
+// //               <input type="file" id="addressVerification" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onChange={handleDetailing} required />
+// //             </label>
+// //             <label>
+// //               Health and Safety Certificates:
+// //               <input type="file" id="healthAndSafetyCertificates" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onChange={handleDetailing}  required />
+// //             </label>
+// //             <label>
+// //               Tax Registration:
+// //               <input type="file" id="taxRegistration" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onChange={handleDetailing} required />
+// //             </label> */}
+// //             <button type="submit" disabled={!agreeTerms}>Submit</button>
+// //           </form>
+// //         </div>
+// //         </div>
+// //       );
+// // };
+
+// //   return (
+// //     <div className='main'>
+// //       <Header />
+// //       <NavigationBar handleLogout={handleLogout} />
+// //       <div className='container'>
+// //       <Sidebar />
+// //       <div className='content'>
+// //       <Restaurant/>
+// //       </div>
+// //       </div>
+// //     </div>
+// //   );
+// // };
+
+// // export default Main;
+// =======
+
+// >>>>>>> origin/master
