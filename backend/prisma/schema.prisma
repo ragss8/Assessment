@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  RESTAURANT_OWNER
+  DELIVERY_PARTNER
+  ADMIN
+}
+
+enum TableFeature {
+  WINDOW_VIEW
+  PROJECTOR_VIEW
+  TERRACE
+  PRIVATE_DINING
+  FAMILY_FRIENDLY
+  QUIET_ZONE
+  LIVE_MUSIC_VIEW
+  BAR_COUNTER
+}
+
+enum BookingStatus {
+  REQUESTED
+  CONFIRMED
+  SEATED
+  CANCELLED
+  COMPLETED
+}
+
+enum OrderStatus {
+  PLACED
+  PREPARING
+  READY
+  PICKED_UP
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  AVAILABLE
+  ASSIGNED
+  PICKED_UP
+  DELIVERED
+  OFFLINE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id               String       @id @default(uuid())
+  name             String
+  email            String       @unique
+  phone            String?
+  passwordHash     String
+  role             UserRole     @default(CUSTOMER)
+  bookings         Booking[]
+  orders           Order[]
+  ownedRestaurants Restaurant[] @relation("OwnedRestaurants")
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Restaurant {
+  id                       String            @id @default(uuid())
+  slug                     String            @unique
+  source                   String            @default("CURATED")
+  syncQuery                String?
+  googlePlaceId            String?           @unique
+  googleMapsUri            String?
+  websiteUri               String?
+  phoneNumber              String?
+  name                     String
+  description              String
+  cuisine                  String
+  address                  String
+  neighborhood             String
+  city                     String
+  latitude                 Decimal?          @db.Decimal(9, 6)
+  longitude                Decimal?          @db.Decimal(9, 6)
+  averageRating            Decimal           @default(0) @db.Decimal(2, 1)
+  priceForTwo              Int
+  deliveryTimeMin          Int
+  heroImageUrl             String?
+  primaryPhotoName         String?
+  primaryPhotoAttributions Json              @default("[]")
+  outdoorSeating           Boolean           @default(false)
+  reservable               Boolean           @default(false)
+  goodForGroups            Boolean           @default(false)
+  servesVegetarianFood     Boolean           @default(false)
+  isActive                 Boolean           @default(true)
+  isOpen                   Boolean           @default(true)
+  approvalStatus           ApprovalStatus    @default(APPROVED)
+  documents                Json              @default("[]")
+  ownerId                  String?
+  owner                    User?             @relation("OwnedRestaurants", fields: [ownerId], references: [id], onDelete: SetNull)
+  seatingZones             SeatingZone[]
+  tables                   RestaurantTable[]
+  viewScenes               ViewScene[]
+  menuItems                MenuItem[]
+  bookings                 Booking[]
+  orders                   Order[]
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+}
+
+model SeatingZone {
+  id           String            @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name         String
+  description  String
+  floor        String
+  ambience     String
+  features     TableFeature[]
+  viewScenes   ViewScene[]
+  tables       RestaurantTable[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model RestaurantTable {
+  id           String         @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  zoneId       String
+  zone         SeatingZone    @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  label        String
+  capacity     Int
+  minSpend     Int            @default(0)
+  features     TableFeature[]
+  x            Int
+  y            Int
+  rotation     Int            @default(0)
+  isActive     Boolean        @default(true)
+  bookings     Booking[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([restaurantId, label])
+}
+
+model ViewScene {
+  id                String       @id @default(uuid())
+  restaurantId      String
+  restaurant        Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  zoneId            String?
+  zone              SeatingZone? @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  title             String
+  imageUrl          String
+  thumbnailUrl      String?
+  sourcePhotoName   String?
+  photoAttributions Json         @default("[]")
+  yaw               Int          @default(0)
+  pitch             Int          @default(0)
+  hotSpots          Json         @default("[]")
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([restaurantId, title])
+}
+
+model Booking {
+  id              String           @id @default(uuid())
+  restaurantId    String
+  restaurant      Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  tableId         String?
+  table           RestaurantTable? @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  customerId      String?
+  customer        User?            @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName    String
+  customerPhone   String
+  partySize       Int
+  bookingTime     DateTime
+  status          BookingStatus    @default(REQUESTED)
+  preferredViews  TableFeature[]
+  specialRequests String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([restaurantId, bookingTime])
+}
+
+model MenuItem {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name         String
+  description  String
+  price        Int
+  isVeg        Boolean    @default(true)
+  isAvailable  Boolean    @default(true)
+  category     String     @default("Main")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Order {
+  id                 String              @id @default(uuid())
+  restaurantId       String
+  restaurant         Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  customerId         String?
+  customer           User?               @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName       String
+  phone              String
+  address            String
+  status             OrderStatus         @default(PLACED)
+  total              Int
+  items              OrderItem[]
+  deliveryAssignment DeliveryAssignment?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model OrderItem {
+  id         String @id @default(uuid())
+  orderId    String
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  name       String
+  quantity   Int
+  unitPrice  Int
+}
+
+model DeliveryPartner {
+  id           String               @id @default(uuid())
+  name         String
+  phone        String
+  email        String               @unique
+  passwordHash String
+  vehicleType  String
+  status       DeliveryStatus       @default(AVAILABLE)
+  assignments  DeliveryAssignment[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+}
+
+model DeliveryAssignment {
+  id               String          @id @default(uuid())
+  partnerId        String
+  partner          DeliveryPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  orderId          String          @unique
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  pickupAddress    String
+  dropAddress      String
+  estimatedMinutes Int
+  payout           Int
+  status           DeliveryStatus  @default(ASSIGNED)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
